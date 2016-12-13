@@ -1,4 +1,4 @@
-package de.brokenpipe.myfirstapp;
+package de.brokenpipe.taskermqtt;
 
 import org.junit.Test;
 

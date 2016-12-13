@@ -60,7 +60,7 @@
     <Preference android:title="nur ein Test">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="de.brokenpipe.myfirstapp.MainActivity"
-            android:targetPackage="de.brokenpipe.myfirstapp" />
+            android:targetClass="de.brokenpipe.taskermqtt.MainActivity"
+            android:targetPackage="de.brokenpipe.taskermqtt" />
     </Preference>
 </PreferenceScreen>

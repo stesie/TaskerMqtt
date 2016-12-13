@@ -1,4 +1,4 @@
-package de.brokenpipe.myfirstapp;
+package de.brokenpipe.taskermqtt;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
-    public final static String EXTRA_MESSAGE = "de.brokenpipe.myfirstapp.MESSAGE";
+    public final static String EXTRA_MESSAGE = "de.brokenpipe.taskermqtt.MESSAGE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

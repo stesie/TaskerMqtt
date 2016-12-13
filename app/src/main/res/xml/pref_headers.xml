@@ -3,7 +3,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="de.brokenpipe.myfirstapp.SettingsActivity$MqttConnectionPreferenceFragment"
+        android:fragment="de.brokenpipe.taskermqtt.SettingsActivity$MqttConnectionPreferenceFragment"
         android:title="@string/pref_header_mqtt_connection" />
 
 </preference-headers>
