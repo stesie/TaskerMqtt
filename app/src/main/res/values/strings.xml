@@ -16,4 +16,6 @@
     <string name="pref_title_mqtt_username">MQTT Username</string>
     <string name="pref_title_mqtt_password">MQTT Password</string>
     <string name="pref_header_mqtt_connection">MQTT Connection</string>
+    <string name="pref_title_mqtt_connection_settings">MQTT Connection</string>
+    <string name="pref_title_testing"><![CDATA[Testing & Debugging]]></string>
 </resources>

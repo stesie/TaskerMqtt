@@ -1,66 +1,64 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <EditTextPreference
-        android:capitalize="none"
-        android:key="mqtt_host"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_mqtt_host" />
+    <PreferenceCategory android:title="@string/pref_title_mqtt_connection_settings">
+        <EditTextPreference
+            android:capitalize="none"
+            android:key="mqtt_host"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_mqtt_host" />
+        <EditTextPreference
+            android:capitalize="none"
+            android:defaultValue="@string/pref_default_mqtt_port"
+            android:inputType="number"
+            android:key="mqtt_port"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_mqtt_port" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="mqtt_use_ssl"
+            android:title="@string/pref_title_mqtt_use_ssl" />
+        <EditTextPreference
+            android:capitalize="none"
+            android:defaultValue="@string/pref_default_mqtt_client_id"
+            android:key="mqtt_client_id"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_mqtt_client_id" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="mqtt_use_auth"
+            android:title="@string/pref_title_mqtt_use_auth" />
+        <EditTextPreference
+            android:capitalize="none"
+            android:dependency="mqtt_use_auth"
+            android:key="mqtt_username"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_mqtt_username" />
+        <EditTextPreference
+            android:capitalize="none"
+            android:dependency="mqtt_use_auth"
+            android:inputType="textPassword"
+            android:key="mqtt_password"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_mqtt_password" />
+    </PreferenceCategory>
 
-    <EditTextPreference
-        android:capitalize="none"
-        android:defaultValue="@string/pref_default_mqtt_port"
-        android:inputType="number"
-        android:key="mqtt_port"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_mqtt_port" />
-
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="mqtt_use_ssl"
-        android:title="@string/pref_title_mqtt_use_ssl" />
-
-    <EditTextPreference
-        android:capitalize="none"
-        android:defaultValue="@string/pref_default_mqtt_client_id"
-        android:key="mqtt_client_id"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_mqtt_client_id" />
-
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="mqtt_use_auth"
-        android:title="@string/pref_title_mqtt_use_auth" />
-
-    <EditTextPreference
-        android:capitalize="none"
-        android:dependency="mqtt_use_auth"
-        android:key="mqtt_username"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_mqtt_username" />
-
-    <EditTextPreference
-        android:capitalize="none"
-        android:dependency="mqtt_use_auth"
-        android:inputType="textPassword"
-        android:key="mqtt_password"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/pref_title_mqtt_password" />
-
-    <Preference android:title="nur ein Test">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetClass="de.brokenpipe.taskermqtt.MainActivity"
-            android:targetPackage="de.brokenpipe.taskermqtt" />
-    </Preference>
+    <PreferenceCategory android:title="@string/pref_title_testing">
+        <Preference android:title="nur ein Test">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="de.brokenpipe.taskermqtt.MainActivity"
+                android:targetPackage="de.brokenpipe.taskermqtt" />
+        </Preference>
+    </PreferenceCategory>
 </PreferenceScreen>
