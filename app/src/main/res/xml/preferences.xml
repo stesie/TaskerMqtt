@@ -55,12 +55,16 @@
 
     <PreferenceCategory android:title="@string/pref_title_testing">
         <Preference
-            android:key="start_service"
-            android:title="@string/pref_title_start_service" />
+            android:key="mqtt_connect"
+            android:title="@string/pref_title_mqtt_connect" />
 
         <Preference
-            android:key="stop_service"
-            android:title="@string/pref_title_stop_service" />
+            android:key="mqtt_disconnect"
+            android:title="@string/pref_title_mqtt_disconnect" />
+
+        <Preference
+            android:key="mqtt_subscribe"
+            android:title="@string/pref_title_mqtt_subscribe" />
         <!-- <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="de.brokenpipe.taskermqtt.MainActivity"

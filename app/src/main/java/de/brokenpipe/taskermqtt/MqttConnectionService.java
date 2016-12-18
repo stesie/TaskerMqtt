@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -19,46 +22,71 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.lang.ref.WeakReference;
+
 public class MqttConnectionService extends Service {
     public static final String MQTT_MESSAGE_RECEIVED = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.message_received";
     public static final String MQTT_TOPIC = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.topic";
     public static final String MQTT_PAYLOAD = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.payload";
 
+    static final int MSG_CONNECT = 1;
+    static final int MSG_DISCONNECT = 2;
+    static final int MSG_SUBSCRIBE = 3;
+
+
     private static final String TAG = "MqttConnectionService";
     private MqttClient mqttClient;
+    private final Messenger messenger = new Messenger(new IncomingHandler(this));
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return messenger.getBinder();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        /* String message;
+    static class IncomingHandler extends Handler {
+        private final WeakReference<MqttConnectionService> service;
 
+        IncomingHandler(MqttConnectionService _service) {
+            service = new WeakReference<MqttConnectionService>(_service);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(TAG, "got message" + String.valueOf(msg.what));
+
+            switch (msg.what) {
+                case MSG_CONNECT:
+                    service.get().connect();
+                    break;
+
+                case MSG_DISCONNECT:
+                    service.get().disconnect();
+                    break;
+
+                case MSG_SUBSCRIBE:
+                    try {
+                        final String topic = msg.getData().getString(MQTT_TOPIC);
+                        Log.d(TAG, "subscribing to " + topic);
+                        service.get().mqttClient.subscribe(topic);
+                    } catch (MqttException e) {
+                        Log.e(TAG, "failed to subscribe: " + e.toString());
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void connect() {
         if (mqttClient == null) {
-            message = "failed to start service";
-        }
-        else if (mqttClient.isConnected()) {
-            message = "MQTT Connection established";
-        }
-        else {
-            message = "Not connected";
+            if (!createMqttClient())
+                return;
         }
 
-
-        Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
-        toast.show(); */
-
-        return super.onStartCommand(intent, flags, startId);
+        if (!mqttClient.isConnected())
+            new EstablishConnection().execute();
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.i(TAG, "starting service");
-
+    private boolean createMqttClient() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final String host = prefs.getString("mqtt_host", null);
         final String clientId = prefs.getString("mqtt_client_id", null);
@@ -66,13 +94,13 @@ public class MqttConnectionService extends Service {
         if (host == null) {
             Log.e(TAG, "mqtt target host not configured");
             this.stopSelf();
-            return;
+            return true;
         }
 
         if (clientId == null) {
             Log.e(TAG, "mqtt client id not configured");
             this.stopSelf();
-            return;
+            return true;
         }
 
         final int port = Integer.parseInt(prefs.getString("mqtt_port", "1883"));
@@ -83,23 +111,22 @@ public class MqttConnectionService extends Service {
             mqttClient.setCallback(new MqttEventHandler());
         } catch (MqttException e) {
             Log.e(TAG, "failed to establish mqtt broker connection: " + e.toString());
-            this.stopSelf();
-            return;
+            return false;
         }
 
-        new EstablishConnection().execute();
+        return true;
     }
 
-    @Override
-    public void onDestroy() {
+    private void disconnect() {
+        if (mqttClient == null)
+            return;
+
         try {
             mqttClient.disconnect();
             Toast.makeText(this, "Disconnected from MQTT Broker", Toast.LENGTH_SHORT).show();
         } catch (MqttException e) {
             Log.e(TAG, "failed to disconnect from mqtt broker: " + e.toString());
         }
-
-        super.onDestroy();
     }
 
     class MqttEventHandler implements MqttCallback {
@@ -167,7 +194,6 @@ public class MqttConnectionService extends Service {
 
             try {
                 MqttConnectionService.this.mqttClient.connect(options);
-                MqttConnectionService.this.mqttClient.subscribe("foo");
             } catch (MqttException e) {
                 Log.e(TAG, "failed to connect to mqtt broker: " + e.toString());
                 MqttConnectionService.this.stopSelf();

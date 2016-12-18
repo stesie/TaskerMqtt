@@ -2,17 +2,26 @@ package de.brokenpipe.taskermqtt;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -89,6 +98,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public static class TaskerMqttPreferenceFragment extends PreferenceFragment {
         Intent connectionService;
         BroadcastReceiver messageReceiver;
+        Messenger serviceMessenger = null;
+
+        private ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                serviceMessenger = new Messenger(service);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
 
         @Override
         public void onStop() {
@@ -114,19 +136,42 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("mqtt_username"));
 
             connectionService = new Intent(getActivity(), MqttConnectionService.class);
+            getActivity().bindService(connectionService, serviceConnection, Context.BIND_AUTO_CREATE);
 
-            findPreference("start_service").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            findPreference("mqtt_connect").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    getActivity().startService(connectionService);
+                    sendToService(MqttConnectionService.MSG_CONNECT, null);
                     return true;
                 }
             });
 
-            findPreference("stop_service").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            findPreference("mqtt_disconnect").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    getActivity().stopService(connectionService);
+                    sendToService(MqttConnectionService.MSG_DISCONNECT, null);
+                    return true;
+                }
+            });
+
+            findPreference("mqtt_subscribe").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    final EditText topic = new EditText(getActivity());
+
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle("Subscribe Topic")
+                            .setMessage("Topic (or pattern) to subscribe to")
+                            .setView(topic)
+                            .setPositiveButton("Subscribe", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString(MqttConnectionService.MQTT_TOPIC, topic.getText().toString());
+                                    sendToService(MqttConnectionService.MSG_SUBSCRIBE, bundle);
+                                }
+                            })
+                    .show();
                     return true;
                 }
             });
@@ -140,6 +185,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     toast.show();
                 }
             };
+        }
+
+        private void sendToService(int what, Bundle bundle) {
+            Message msg = Message.obtain(null, what);
+            msg.setData(bundle);
+
+            try {
+                serviceMessenger.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
