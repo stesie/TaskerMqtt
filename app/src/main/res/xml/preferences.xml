@@ -57,6 +57,10 @@
         <Preference
             android:key="start_service"
             android:title="@string/pref_title_start_service" />
+
+        <Preference
+            android:key="stop_service"
+            android:title="@string/pref_title_stop_service" />
         <!-- <intent
             android:action="android.intent.action.VIEW"
             android:targetClass="de.brokenpipe.taskermqtt.MainActivity"

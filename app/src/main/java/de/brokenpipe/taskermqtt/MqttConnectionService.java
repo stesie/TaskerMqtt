@@ -90,6 +90,18 @@ public class MqttConnectionService extends Service {
         new EstablishConnection().execute();
     }
 
+    @Override
+    public void onDestroy() {
+        try {
+            mqttClient.disconnect();
+            Toast.makeText(this, "Disconnected from MQTT Broker", Toast.LENGTH_SHORT).show();
+        } catch (MqttException e) {
+            Log.e(TAG, "failed to disconnect from mqtt broker: " + e.toString());
+        }
+
+        super.onDestroy();
+    }
+
     class MqttEventHandler implements MqttCallback {
 
         @Override

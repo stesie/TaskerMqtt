@@ -19,4 +19,5 @@
     <string name="pref_title_mqtt_connection_settings">MQTT Connection</string>
     <string name="pref_title_testing"><![CDATA[Testing & Debugging]]></string>
     <string name="pref_title_start_service">Start Service</string>
+    <string name="pref_title_stop_service">Stop Service</string>
 </resources>

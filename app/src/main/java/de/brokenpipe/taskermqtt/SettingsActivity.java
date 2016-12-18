@@ -12,6 +12,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
@@ -86,17 +87,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class TaskerMqttPreferenceFragment extends PreferenceFragment {
-        BroadcastReceiver receiver;
+        Intent connectionService;
+        BroadcastReceiver messageReceiver;
 
         @Override
         public void onStop() {
-            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(receiver);
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(messageReceiver);
             super.onStop();
         }
 
         @Override
         public void onStart() {
-            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver,
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(messageReceiver,
                     new IntentFilter(MqttConnectionService.MQTT_MESSAGE_RECEIVED));
             super.onStart();
         }
@@ -111,17 +113,25 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("mqtt_client_id"));
             bindPreferenceSummaryToValue(findPreference("mqtt_username"));
 
+            connectionService = new Intent(getActivity(), MqttConnectionService.class);
+
             findPreference("start_service").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent svc = new Intent(getActivity(), MqttConnectionService.class);
-                    getActivity().startService(svc);
-
+                    getActivity().startService(connectionService);
                     return true;
                 }
             });
 
-            receiver = new BroadcastReceiver() {
+            findPreference("stop_service").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    getActivity().stopService(connectionService);
+                    return true;
+                }
+            });
+
+            messageReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     String message = "MQTT Message on " + intent.getStringExtra(MqttConnectionService.MQTT_TOPIC)
