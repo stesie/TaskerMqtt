@@ -1,6 +1,7 @@
 package de.brokenpipe.taskermqtt;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -89,6 +90,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("mqtt_port"));
             bindPreferenceSummaryToValue(findPreference("mqtt_client_id"));
             bindPreferenceSummaryToValue(findPreference("mqtt_username"));
+
+            findPreference("start_service").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent svc = new Intent(getActivity(), MqttConnectionService.class);
+                    getActivity().startService(svc);
+
+                    return true;
+                }
+            });
         }
     }
 }

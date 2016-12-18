@@ -54,11 +54,12 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_title_testing">
-        <Preference android:title="nur ein Test">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetClass="de.brokenpipe.taskermqtt.MainActivity"
-                android:targetPackage="de.brokenpipe.taskermqtt" />
-        </Preference>
+        <Preference
+            android:key="start_service"
+            android:title="@string/pref_title_start_service" />
+        <!-- <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="de.brokenpipe.taskermqtt.MainActivity"
+            android:targetPackage="de.brokenpipe.taskermqtt" /> -->
     </PreferenceCategory>
 </PreferenceScreen>
