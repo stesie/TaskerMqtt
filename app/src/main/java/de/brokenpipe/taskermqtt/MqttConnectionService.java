@@ -10,9 +10,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 public class MqttConnectionService extends Service {
@@ -72,6 +75,7 @@ public class MqttConnectionService extends Service {
 
         try {
             mqttClient = new MqttClient(brokerUrl, clientId, new MemoryPersistence());
+            mqttClient.setCallback(new MqttEventHandler());
         } catch (MqttException e) {
             Log.e(TAG, "failed to establish mqtt broker connection: " + e.toString());
             this.stopSelf();
@@ -79,6 +83,27 @@ public class MqttConnectionService extends Service {
         }
 
         new EstablishConnection().execute();
+    }
+
+    class MqttEventHandler implements MqttCallback {
+
+        @Override
+        public void connectionLost(Throwable cause) {
+
+        }
+
+        @Override
+        public void messageArrived(String topic, MqttMessage message) throws Exception {
+            Log.d(TAG, "messageArrived on " + topic + ": " + new String(message.getPayload()));
+            //Toast toast = Toast.makeText(MqttConnectionService.this, "MQTT Message on " + topic + ": " + new String(message.getPayload()), Toast.LENGTH_SHORT);
+            //toast.show();
+
+        }
+
+        @Override
+        public void deliveryComplete(IMqttDeliveryToken token) {
+
+        }
     }
 
     class EstablishConnection extends AsyncTask<Void, Void, Void> {
@@ -115,6 +140,7 @@ public class MqttConnectionService extends Service {
 
             try {
                 MqttConnectionService.this.mqttClient.connect(options);
+                MqttConnectionService.this.mqttClient.subscribe("foo");
             } catch (MqttException e) {
                 Log.e(TAG, "failed to connect to mqtt broker: " + e.toString());
                 MqttConnectionService.this.stopSelf();
