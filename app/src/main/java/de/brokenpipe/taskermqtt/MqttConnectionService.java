@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,6 +20,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 public class MqttConnectionService extends Service {
+    public static final String MQTT_MESSAGE_RECEIVED = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.message_received";
+    public static final String MQTT_TOPIC = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.topic";
+    public static final String MQTT_PAYLOAD = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.payload";
+
     private static final String TAG = "MqttConnectionService";
     private MqttClient mqttClient;
 
@@ -89,15 +94,26 @@ public class MqttConnectionService extends Service {
 
         @Override
         public void connectionLost(Throwable cause) {
+            Log.d(TAG, "connectionLost, triggering reconnect");
 
+            try {
+                MqttConnectionService.this.mqttClient.reconnect();
+            } catch (MqttException e) {
+                Log.e(TAG, "failed to reconnect to mqtt broker: " + e.toString());
+                MqttConnectionService.this.stopSelf();
+            }
         }
 
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
-            Log.d(TAG, "messageArrived on " + topic + ": " + new String(message.getPayload()));
-            //Toast toast = Toast.makeText(MqttConnectionService.this, "MQTT Message on " + topic + ": " + new String(message.getPayload()), Toast.LENGTH_SHORT);
-            //toast.show();
+            final String payload = new String(message.getPayload());
+            Log.d(TAG, "messageArrived on " + topic + ": " + payload);
 
+            Intent intent = new Intent(MQTT_MESSAGE_RECEIVED);
+            intent.putExtra(MQTT_TOPIC, topic);
+            intent.putExtra(MQTT_PAYLOAD, payload);
+
+            LocalBroadcastManager.getInstance(MqttConnectionService.this).sendBroadcast(intent);
         }
 
         @Override
@@ -116,7 +132,6 @@ public class MqttConnectionService extends Service {
         @Override
         protected Void doInBackground(Void... params) {
             final MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
 
             if (prefs.getBoolean("mqtt_use_auth", false)) {
                 final String username = prefs.getString("mqtt_username", null);

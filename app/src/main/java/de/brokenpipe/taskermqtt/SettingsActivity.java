@@ -1,13 +1,18 @@
 package de.brokenpipe.taskermqtt;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
@@ -81,6 +86,21 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class TaskerMqttPreferenceFragment extends PreferenceFragment {
+        BroadcastReceiver receiver;
+
+        @Override
+        public void onStop() {
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(receiver);
+            super.onStop();
+        }
+
+        @Override
+        public void onStart() {
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver,
+                    new IntentFilter(MqttConnectionService.MQTT_MESSAGE_RECEIVED));
+            super.onStart();
+        }
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -100,6 +120,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
+
+            receiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String message = "MQTT Message on " + intent.getStringExtra(MqttConnectionService.MQTT_TOPIC)
+                            + ": " + intent.getStringExtra(MqttConnectionService.MQTT_PAYLOAD);
+                    Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            };
         }
     }
 }
