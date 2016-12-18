@@ -21,4 +21,9 @@
     <string name="pref_title_mqtt_connect">Connect</string>
     <string name="pref_title_mqtt_disconnect">Disconnect</string>
     <string name="pref_title_mqtt_subscribe">Subscribe</string>
+    <string name="plugin_name">TaskerMQTT</string>
+    <string name="pref_title_accept">Accept</string>
+    <string name="btn_accept">Accept</string>
+    <string name="filter_topic">Filter by Topic</string>
+    <string name="filter_payload">Filter Payload</string>
 </resources>
