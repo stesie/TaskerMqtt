@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -151,8 +152,16 @@ public class MqttConnectionService extends Service {
             Intent intent = new Intent(MQTT_MESSAGE_RECEIVED);
             intent.putExtra(MQTT_TOPIC, topic);
             intent.putExtra(MQTT_PAYLOAD, payload);
-
             LocalBroadcastManager.getInstance(MqttConnectionService.this).sendBroadcast(intent);
+
+            Bundle passThroughData = new Bundle();
+            passThroughData.putString(MQTT_TOPIC, topic);
+            passThroughData.putString(MQTT_PAYLOAD, payload);
+
+            Intent queryIntent = new Intent(com.twofortyfouram.locale.Intent.ACTION_REQUEST_QUERY);
+            queryIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_ACTIVITY, EditActivity.class.getName());
+            TaskerPlugin.Event.addPassThroughData(queryIntent, passThroughData);
+            MqttConnectionService.this.sendBroadcast(queryIntent);
         }
 
         @Override

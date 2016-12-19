@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="de.brokenpipe.taskermqtt">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -31,7 +31,7 @@
             android:exported="true"
             android:icon="@drawable/ic_launcher"
             android:label="@string/plugin_name"
-            tools:ignore="ExportedActivity" >
+            tools:ignore="ExportedActivity">
 
             <!-- this Intent filter allows the plug-in to be discovered by Locale -->
             <intent-filter>
@@ -44,7 +44,7 @@
             android:name=".QueryReceiver"
             android:exported="true"
             android:process=":background"
-            tools:ignore="ExportedReceiver" >
+            tools:ignore="ExportedReceiver">
 
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.QUERY_CONDITION" />
