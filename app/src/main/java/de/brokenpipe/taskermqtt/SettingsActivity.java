@@ -20,7 +20,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 

@@ -65,9 +65,5 @@
         <Preference
             android:key="mqtt_subscribe"
             android:title="@string/pref_title_mqtt_subscribe" />
-        <!-- <intent
-            android:action="android.intent.action.VIEW"
-            android:targetClass="de.brokenpipe.taskermqtt.MainActivity"
-            android:targetPackage="de.brokenpipe.taskermqtt" /> -->
     </PreferenceCategory>
 </PreferenceScreen>
