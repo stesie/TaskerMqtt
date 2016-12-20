@@ -13,6 +13,16 @@ public class QueryReceiver extends BroadcastReceiver {
         final String filterPayload = localeBundle.getString(BundleExtraKeys.FILTER_PAYLOAD);
 
         final Bundle passThroughMessage = TaskerPlugin.Event.retrievePassThroughData(intent);
+
+        if (passThroughMessage == null) {
+            // Tasker Kickstart event; launch service if it isn't running
+            Intent connectionService = new Intent(context, MqttConnectionService.class);
+            context.startService(connectionService);
+
+            setResultCode(com.twofortyfouram.locale.Intent.RESULT_CONDITION_UNSATISFIED);
+            return;
+        }
+
         final String messageTopic = passThroughMessage.getString(MqttConnectionService.MQTT_TOPIC);
         final String messagePayload = passThroughMessage.getString(MqttConnectionService.MQTT_PAYLOAD);
 
