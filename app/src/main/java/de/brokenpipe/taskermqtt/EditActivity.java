@@ -38,10 +38,6 @@ public class EditActivity extends Activity {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE, bundle);
 
-        // Tasker's variable replacement
-        //if (TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement(this))
-        //    TaskerPlugin.Setting.setVariableReplaceKeys(bundle, new String[]{BundleExtraKeys.TOPIC, BundleExtraKeys.PAYLOAD});
-
         // We define the blurb that will appear in the configuration
         StringBuilder blurb = new StringBuilder();
 
@@ -53,6 +49,13 @@ public class EditActivity extends Activity {
         blurb.append(payloadText.equals("") ? "*" : payloadText);
 
         resultIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_STRING_BLURB, blurb.toString());
+
+        if (TaskerPlugin.hostSupportsRelevantVariables(getIntent().getExtras())) {
+            TaskerPlugin.addRelevantVariableList(resultIntent, new String [] {
+                    "%mqtopic\nMQTT Topic\nThe topic the message was received on",
+                    "%mqpayload\nMQTT Payload\nThe payload of the message that was received"
+            });
+        }
 
         setResult(RESULT_OK, resultIntent);
         super.finish();

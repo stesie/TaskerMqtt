@@ -26,6 +26,13 @@ public class QueryReceiver extends BroadcastReceiver {
         final String messageTopic = passThroughMessage.getString(MqttConnectionService.MQTT_TOPIC);
         final String messagePayload = passThroughMessage.getString(MqttConnectionService.MQTT_PAYLOAD);
 
+        if (TaskerPlugin.Condition.hostSupportsVariableReturn(intent.getExtras())) {
+            Bundle varsBundle = new Bundle();
+            varsBundle.putString("%mqtopic", messageTopic);
+            varsBundle.putString("%mqpayload", messagePayload);
+            TaskerPlugin.addVariableBundle(getResultExtras(true), varsBundle);
+        }
+
         if (filterTopic != null && !filterTopic.isEmpty() && !filterTopic.equals(messageTopic)) {
             setResultCode(com.twofortyfouram.locale.Intent.RESULT_CONDITION_UNSATISFIED);
             return;
