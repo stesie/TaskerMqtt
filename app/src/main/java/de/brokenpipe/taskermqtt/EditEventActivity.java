@@ -3,12 +3,10 @@ package de.brokenpipe.taskermqtt;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-public class EditActivity extends Activity {
+public class EditEventActivity extends Activity {
     private EditText filterTopicText, filterPayloadText;
 
     @Override
@@ -17,7 +15,7 @@ public class EditActivity extends Activity {
 
         final Bundle localeBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
 
-        setContentView(R.layout.edit);
+        setContentView(R.layout.edit_event);
         filterTopicText = (EditText) findViewById(R.id.filter_topic);
         filterPayloadText = (EditText) findViewById(R.id.filter_payload);
 

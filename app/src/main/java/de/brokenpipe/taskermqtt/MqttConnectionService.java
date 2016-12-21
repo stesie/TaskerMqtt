@@ -1,7 +1,6 @@
 package de.brokenpipe.taskermqtt;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -159,7 +158,7 @@ public class MqttConnectionService extends Service {
             passThroughData.putString(MQTT_PAYLOAD, payload);
 
             Intent queryIntent = new Intent(com.twofortyfouram.locale.Intent.ACTION_REQUEST_QUERY);
-            queryIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_ACTIVITY, EditActivity.class.getName());
+            queryIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_ACTIVITY, EditEventActivity.class.getName());
             TaskerPlugin.Event.addPassThroughData(queryIntent, passThroughData);
             MqttConnectionService.this.sendBroadcast(queryIntent);
         }
