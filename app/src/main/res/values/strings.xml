@@ -26,4 +26,12 @@
     <string name="btn_accept">Accept</string>
     <string name="filter_topic">Filter by Topic</string>
     <string name="filter_payload">Filter Payload</string>
+    <string name="title_event_source">Event Source</string>
+    <string name="title_message_filter">Message Filter</string>
+
+    <string-array name="event_sources">
+        <item>Message Received</item>
+        <item>Connected</item>
+        <item>Disconnected</item>
+    </string-array>
 </resources>
