@@ -59,8 +59,8 @@ public class EditEventActivity extends Activity {
                 break;
         }
 
-        filterTopicText.setText(localeBundle.getString(BundleExtraKeys.FILTER_TOPIC, ""));
-        filterPayloadText.setText(localeBundle.getString(BundleExtraKeys.FILTER_PAYLOAD, ""));
+        filterTopicText.setText(localeBundle.getString(BundleExtraKeys.TOPIC, ""));
+        filterPayloadText.setText(localeBundle.getString(BundleExtraKeys.PAYLOAD, ""));
     }
 
     public void finishActivity(View view) {
@@ -79,8 +79,8 @@ public class EditEventActivity extends Activity {
         switch (eventSourceSpinner.getSelectedItemPosition()) {
             case 0:
                 bundle.putString(BundleExtraKeys.EVENT_SOURCE, BundleExtraKeys.EVENT_SOURCE_MESSAGE_RECEIVED);
-                bundle.putString(BundleExtraKeys.FILTER_TOPIC, topicText);
-                bundle.putString(BundleExtraKeys.FILTER_PAYLOAD, payloadText);
+                bundle.putString(BundleExtraKeys.TOPIC, topicText);
+                bundle.putString(BundleExtraKeys.PAYLOAD, payloadText);
 
                 blurb.append("Topic: ");
                 blurb.append(topicText.equals("") ? "*" : topicText);

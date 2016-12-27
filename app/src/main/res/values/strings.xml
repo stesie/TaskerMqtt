@@ -28,10 +28,21 @@
     <string name="filter_payload">Filter Payload</string>
     <string name="title_event_source">Event Source</string>
     <string name="title_message_filter">Message Filter</string>
+    <string name="title_action_type">Action</string>
+    <string name="title_action_properties">Action Properties</string>
+    <string name="topic">Topic</string>
+    <string name="payload">Payload</string>
 
     <string-array name="event_sources">
         <item>Message Received</item>
         <item>Connected</item>
         <item>Disconnected</item>
+    </string-array>
+
+    <string-array name="action_types">
+        <item>Connect</item>
+        <item>Disconnect</item>
+        <item>Subscribe Topic</item>
+        <item>Publish Message</item>
     </string-array>
 </resources>

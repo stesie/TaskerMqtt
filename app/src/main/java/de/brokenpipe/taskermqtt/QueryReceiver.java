@@ -42,8 +42,8 @@ public class QueryReceiver extends BroadcastReceiver {
     }
 
     private void handleMessageReceived(Intent intent, Bundle localeBundle, Bundle passThroughMessage) {
-        final String filterTopic = localeBundle.getString(BundleExtraKeys.FILTER_TOPIC);
-        final String filterPayload = localeBundle.getString(BundleExtraKeys.FILTER_PAYLOAD);
+        final String filterTopic = localeBundle.getString(BundleExtraKeys.TOPIC);
+        final String filterPayload = localeBundle.getString(BundleExtraKeys.PAYLOAD);
 
         final String messageTopic = passThroughMessage.getString(MqttConnectionService.MQTT_TOPIC);
         final String messagePayload = passThroughMessage.getString(MqttConnectionService.MQTT_PAYLOAD);
