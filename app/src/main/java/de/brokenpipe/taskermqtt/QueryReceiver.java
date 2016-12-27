@@ -9,9 +9,6 @@ public class QueryReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final Bundle localeBundle = intent.getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
-        final String filterTopic = localeBundle.getString(BundleExtraKeys.FILTER_TOPIC);
-        final String filterPayload = localeBundle.getString(BundleExtraKeys.FILTER_PAYLOAD);
-
         final Bundle passThroughMessage = TaskerPlugin.Event.retrievePassThroughData(intent);
 
         if (passThroughMessage == null) {
@@ -22,6 +19,31 @@ public class QueryReceiver extends BroadcastReceiver {
             setResultCode(com.twofortyfouram.locale.Intent.RESULT_CONDITION_UNSATISFIED);
             return;
         }
+
+        final String occurredEventSource = passThroughMessage.getString(MqttConnectionService.MQTT_EVENT_SOURCE);
+        final String expectedEventSource = localeBundle.getString(BundleExtraKeys.EVENT_SOURCE);
+
+        if (occurredEventSource == null || expectedEventSource == null ||
+                !occurredEventSource.equals(expectedEventSource)) {
+            setResultCode(com.twofortyfouram.locale.Intent.RESULT_CONDITION_UNSATISFIED);
+            return;
+        }
+
+        switch (occurredEventSource) {
+            case BundleExtraKeys.EVENT_SOURCE_MESSAGE_RECEIVED:
+                handleMessageReceived(intent, localeBundle, passThroughMessage);
+                break;
+
+            case BundleExtraKeys.EVENT_SOURCE_CONNECTED:
+            case BundleExtraKeys.EVENT_SOURCE_DISCONNECTED:
+                setResultCode(com.twofortyfouram.locale.Intent.RESULT_CONDITION_SATISFIED);
+                break;
+        }
+    }
+
+    private void handleMessageReceived(Intent intent, Bundle localeBundle, Bundle passThroughMessage) {
+        final String filterTopic = localeBundle.getString(BundleExtraKeys.FILTER_TOPIC);
+        final String filterPayload = localeBundle.getString(BundleExtraKeys.FILTER_PAYLOAD);
 
         final String messageTopic = passThroughMessage.getString(MqttConnectionService.MQTT_TOPIC);
         final String messagePayload = passThroughMessage.getString(MqttConnectionService.MQTT_PAYLOAD);

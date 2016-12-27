@@ -26,6 +26,8 @@ import java.lang.ref.WeakReference;
 
 public class MqttConnectionService extends Service {
     public static final String MQTT_MESSAGE_RECEIVED = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.message_received";
+
+    public static final String MQTT_EVENT_SOURCE = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.eventSource";
     public static final String MQTT_TOPIC = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.topic";
     public static final String MQTT_PAYLOAD = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.payload";
 
@@ -133,6 +135,10 @@ public class MqttConnectionService extends Service {
 
         @Override
         public void connectionLost(Throwable cause) {
+            Bundle passThroughData = new Bundle();
+            passThroughData.putString(MQTT_EVENT_SOURCE, BundleExtraKeys.EVENT_SOURCE_DISCONNECTED);
+            broadcastEventQuery(passThroughData);
+
             Log.d(TAG, "connectionLost, triggering reconnect");
 
             try {
@@ -154,19 +160,23 @@ public class MqttConnectionService extends Service {
             LocalBroadcastManager.getInstance(MqttConnectionService.this).sendBroadcast(intent);
 
             Bundle passThroughData = new Bundle();
+            passThroughData.putString(MQTT_EVENT_SOURCE, BundleExtraKeys.EVENT_SOURCE_MESSAGE_RECEIVED);
             passThroughData.putString(MQTT_TOPIC, topic);
             passThroughData.putString(MQTT_PAYLOAD, payload);
-
-            Intent queryIntent = new Intent(com.twofortyfouram.locale.Intent.ACTION_REQUEST_QUERY);
-            queryIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_ACTIVITY, EditEventActivity.class.getName());
-            TaskerPlugin.Event.addPassThroughData(queryIntent, passThroughData);
-            MqttConnectionService.this.sendBroadcast(queryIntent);
+            broadcastEventQuery(passThroughData);
         }
 
         @Override
         public void deliveryComplete(IMqttDeliveryToken token) {
 
         }
+    }
+
+    private void broadcastEventQuery(Bundle passThroughData) {
+        Intent queryIntent = new Intent(com.twofortyfouram.locale.Intent.ACTION_REQUEST_QUERY);
+        queryIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_ACTIVITY, EditEventActivity.class.getName());
+        TaskerPlugin.Event.addPassThroughData(queryIntent, passThroughData);
+        MqttConnectionService.this.sendBroadcast(queryIntent);
     }
 
     class EstablishConnection extends AsyncTask<Void, Void, Void> {
@@ -202,6 +212,10 @@ public class MqttConnectionService extends Service {
 
             try {
                 MqttConnectionService.this.mqttClient.connect(options);
+
+                Bundle passThroughData = new Bundle();
+                passThroughData.putString(MQTT_EVENT_SOURCE, BundleExtraKeys.EVENT_SOURCE_CONNECTED);
+                broadcastEventQuery(passThroughData);
             } catch (MqttException e) {
                 Log.e(TAG, "failed to connect to mqtt broker: " + e.toString());
                 MqttConnectionService.this.stopSelf();
