@@ -41,6 +41,42 @@ public class MqttConnectionService extends Service {
     private final Messenger messenger = new Messenger(new IncomingHandler(this));
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        final Bundle localeBundle = intent.getBundleExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE);
+
+        if (localeBundle == null) {
+            return super.onStartCommand(intent, flags, startId);
+        }
+
+        final String actionType = localeBundle.getString(BundleExtraKeys.ACTION_TYPE);
+
+        if (actionType != null)
+            switch (actionType) {
+                case BundleExtraKeys.ACTION_TYPE_CONNECT:
+                    connect();
+                    break;
+
+                case BundleExtraKeys.ACTION_TYPE_DISCONNECT:
+                    disconnect();
+                    break;
+
+                case BundleExtraKeys.ACTION_TYPE_SUBSCRIBE:
+                    if (mqttClient == null || !mqttClient.isConnected()) {
+                        Log.d(TAG, "currently not connected, connecting implicitly");
+                        connect();
+                    }
+
+                    subscribe(localeBundle.getString(BundleExtraKeys.TOPIC));
+                    break;
+
+                case BundleExtraKeys.ACTION_TYPE_PUBLISH:
+                    break;
+            }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return messenger.getBinder();
     }
@@ -49,7 +85,7 @@ public class MqttConnectionService extends Service {
         private final WeakReference<MqttConnectionService> service;
 
         IncomingHandler(MqttConnectionService _service) {
-            service = new WeakReference<MqttConnectionService>(_service);
+            service = new WeakReference<>(_service);
         }
 
         @Override
@@ -66,13 +102,8 @@ public class MqttConnectionService extends Service {
                     break;
 
                 case MSG_SUBSCRIBE:
-                    try {
-                        final String topic = msg.getData().getString(MQTT_TOPIC);
-                        Log.d(TAG, "subscribing to " + topic);
-                        service.get().mqttClient.subscribe(topic);
-                    } catch (MqttException e) {
-                        Log.e(TAG, "failed to subscribe: " + e.toString());
-                    }
+                    final String topic = msg.getData().getString(MQTT_TOPIC);
+                    service.get().subscribe(topic);
                     break;
             }
         }
@@ -86,6 +117,15 @@ public class MqttConnectionService extends Service {
 
         if (!mqttClient.isConnected())
             new EstablishConnection().execute();
+    }
+
+    private void subscribe(String topic) {
+        try {
+            Log.d(TAG, "subscribing to " + topic);
+            mqttClient.subscribe(topic);
+        } catch (MqttException e) {
+            Log.e(TAG, "failed to subscribe: " + e.toString());
+        }
     }
 
     private boolean createMqttClient() {
