@@ -13,5 +13,6 @@ class BundleExtraKeys {
     static final String ACTION_TYPE_CONNECT = "Connect";
     static final String ACTION_TYPE_DISCONNECT = "Disconnect";
     static final String ACTION_TYPE_SUBSCRIBE = "Subscribe";
+    static final String ACTION_TYPE_UNSUBSCRIBE = "Unsubscribe";
     static final String ACTION_TYPE_PUBLISH = "Publish";
 }

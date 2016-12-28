@@ -27,7 +27,7 @@ public class EditActionActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 topicText.setEnabled(position >= 2);
-                payloadText.setEnabled(position == 3);
+                payloadText.setEnabled(position == 4);
             }
 
             @Override
@@ -57,8 +57,12 @@ public class EditActionActivity extends Activity {
                 this.actionTypeSpinner.setSelection(2);
                 break;
 
-            case BundleExtraKeys.ACTION_TYPE_PUBLISH:
+            case BundleExtraKeys.ACTION_TYPE_UNSUBSCRIBE:
                 this.actionTypeSpinner.setSelection(3);
+                break;
+
+            case BundleExtraKeys.ACTION_TYPE_PUBLISH:
+                this.actionTypeSpinner.setSelection(4);
                 break;
         }
 
@@ -97,6 +101,15 @@ public class EditActionActivity extends Activity {
                 break;
 
             case 3:
+                bundle.putString(BundleExtraKeys.ACTION_TYPE, BundleExtraKeys.ACTION_TYPE_UNSUBSCRIBE);
+                bundle.putString(BundleExtraKeys.TOPIC, topicText);
+
+                blurb.append("Topic: ");
+                blurb.append(topicText.equals("") ? "*" : topicText);
+                blurb.append("\n");
+                break;
+
+            case 4:
                 bundle.putString(BundleExtraKeys.ACTION_TYPE, BundleExtraKeys.ACTION_TYPE_PUBLISH);
                 bundle.putString(BundleExtraKeys.TOPIC, topicText);
                 bundle.putString(BundleExtraKeys.PAYLOAD, payloadText);
@@ -108,7 +121,6 @@ public class EditActionActivity extends Activity {
                 blurb.append("Payload: ");
                 blurb.append(payloadText);
                 break;
-
         }
 
         resultIntent.putExtra(com.twofortyfouram.locale.Intent.EXTRA_BUNDLE, bundle);

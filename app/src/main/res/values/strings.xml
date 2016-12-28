@@ -43,6 +43,7 @@
         <item>Connect</item>
         <item>Disconnect</item>
         <item>Subscribe Topic</item>
+        <item>Unsubscribe Topic</item>
         <item>Publish Message</item>
     </string-array>
 </resources>

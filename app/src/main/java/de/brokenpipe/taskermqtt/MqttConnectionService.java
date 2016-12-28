@@ -61,12 +61,11 @@ public class MqttConnectionService extends Service {
                     break;
 
                 case BundleExtraKeys.ACTION_TYPE_SUBSCRIBE:
-                    if (mqttClient == null || !mqttClient.isConnected()) {
-                        Log.d(TAG, "currently not connected, connecting implicitly");
-                        connect();
-                    }
-
                     subscribe(localeBundle.getString(BundleExtraKeys.TOPIC));
+                    break;
+
+                case BundleExtraKeys.ACTION_TYPE_UNSUBSCRIBE:
+                    unsubscribe(localeBundle.getString(BundleExtraKeys.TOPIC));
                     break;
 
                 case BundleExtraKeys.ACTION_TYPE_PUBLISH:
@@ -120,11 +119,30 @@ public class MqttConnectionService extends Service {
     }
 
     private void subscribe(String topic) {
+        if (mqttClient == null || !mqttClient.isConnected()) {
+            Log.d(TAG, "currently not connected, connecting implicitly");
+            connect();
+        }
+
         try {
             Log.d(TAG, "subscribing to " + topic);
             mqttClient.subscribe(topic);
         } catch (MqttException e) {
             Log.e(TAG, "failed to subscribe: " + e.toString());
+        }
+    }
+
+    private void unsubscribe(String topic) {
+        if (mqttClient == null || !mqttClient.isConnected()) {
+            Log.d(TAG, "currently not connected, ignoring unsubscribe");
+            return;
+        }
+
+        try {
+            Log.d(TAG, "unsubscribing from " + topic);
+            mqttClient.unsubscribe(topic);
+        } catch (MqttException e) {
+            Log.e(TAG, "failed to unsubscribe: " + e.toString());
         }
     }
 
