@@ -73,10 +73,15 @@ public class MqttConnectionService extends Service {
                     break;
 
                 case BundleExtraKeys.ACTION_TYPE_PUBLISH:
+                    publish(localeBundle.getString(BundleExtraKeys.TOPIC), localeBundle.getString(BundleExtraKeys.PAYLOAD));
                     break;
             }
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void publish(String topic, String payload) {
+        runTask(new PublishMessage(topic, payload), true);
     }
 
     @Override
@@ -258,6 +263,32 @@ public class MqttConnectionService extends Service {
                 mqttClient.unsubscribe(topic);
             } catch (MqttException e) {
                 Log.e(TAG, "Failed to unsubscribe from topic: " + topic);
+            }
+            return null;
+        }
+
+        @Override
+        @MainThread
+        protected void onPostExecute(Void aVoid) {
+            processNextTask();
+        }
+    }
+
+    class PublishMessage extends AsyncTask<Void, Void, Void> {
+        private String topic;
+        private String payload;
+
+        PublishMessage (String topic, String payload) {
+            this.topic = topic;
+            this.payload = payload;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                mqttClient.publish(topic, new MqttMessage(payload.getBytes()));
+            } catch (MqttException e) {
+                Log.e(TAG, "Failed to publish message on " + topic);
             }
             return null;
         }
