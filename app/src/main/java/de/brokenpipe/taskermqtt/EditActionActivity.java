@@ -98,6 +98,9 @@ public class EditActionActivity extends Activity {
                 blurb.append("Topic: ");
                 blurb.append(topicText.equals("") ? "*" : topicText);
                 blurb.append("\n");
+
+                if (TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement(this))
+                    TaskerPlugin.Setting.setVariableReplaceKeys(bundle, new String[]{BundleExtraKeys.TOPIC});
                 break;
 
             case 3:
@@ -107,6 +110,9 @@ public class EditActionActivity extends Activity {
                 blurb.append("Topic: ");
                 blurb.append(topicText.equals("") ? "*" : topicText);
                 blurb.append("\n");
+
+                if (TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement(this))
+                    TaskerPlugin.Setting.setVariableReplaceKeys(bundle, new String[]{BundleExtraKeys.TOPIC});
                 break;
 
             case 4:
@@ -120,6 +126,9 @@ public class EditActionActivity extends Activity {
 
                 blurb.append("Payload: ");
                 blurb.append(payloadText);
+
+                if (TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement(this))
+                    TaskerPlugin.Setting.setVariableReplaceKeys(bundle, new String[]{BundleExtraKeys.TOPIC, BundleExtraKeys.PAYLOAD});
                 break;
         }
 
