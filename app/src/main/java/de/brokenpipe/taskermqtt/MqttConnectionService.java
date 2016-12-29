@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
+import android.support.annotation.MainThread;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,6 +24,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.lang.ref.WeakReference;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class MqttConnectionService extends Service {
     public static final String MQTT_MESSAGE_RECEIVED = "de.brokenpipe.taskermqtt.backend.MqttConnectionService.message_received";
@@ -35,10 +38,11 @@ public class MqttConnectionService extends Service {
     static final int MSG_DISCONNECT = 2;
     static final int MSG_SUBSCRIBE = 3;
 
-
     private static final String TAG = "MqttConnectionService";
     private MqttClient mqttClient;
     private final Messenger messenger = new Messenger(new IncomingHandler(this));
+
+    Queue<AsyncTask<Void, Void, Void>> todos = new LinkedList<>();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -119,17 +123,7 @@ public class MqttConnectionService extends Service {
     }
 
     private void subscribe(String topic) {
-        if (mqttClient == null || !mqttClient.isConnected()) {
-            Log.d(TAG, "currently not connected, connecting implicitly");
-            connect();
-        }
-
-        try {
-            Log.d(TAG, "subscribing to " + topic);
-            mqttClient.subscribe(topic);
-        } catch (MqttException e) {
-            Log.e(TAG, "failed to subscribe: " + e.toString());
-        }
+        runTask(new SubscribeTopic(topic));
     }
 
     private void unsubscribe(String topic) {
@@ -237,6 +231,52 @@ public class MqttConnectionService extends Service {
         MqttConnectionService.this.sendBroadcast(queryIntent);
     }
 
+    class SubscribeTopic extends AsyncTask<Void, Void, Void> {
+        private String topic;
+
+        SubscribeTopic (String topic) {
+            this.topic = topic;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                mqttClient.subscribe(topic);
+            } catch (MqttException e) {
+                Log.e(TAG, "Failed to subscribe to topic: " + topic);
+            }
+            return null;
+        }
+
+        @Override
+        @MainThread
+        protected void onPostExecute(Void aVoid) {
+            processNextTask();
+        }
+    }
+
+    private void runTask(AsyncTask<Void, Void, Void> task) {
+        if (todos.isEmpty()) {
+            if (mqttClient != null && mqttClient.isConnected()) {
+                task.execute();
+                return;
+            }
+
+            Log.d(TAG, "currently not connected, connecting implicitly");
+            connect();
+        }
+
+        todos.add(task);
+    }
+
+    private void processNextTask() {
+        if (todos.isEmpty())
+            return;
+
+        AsyncTask<Void, Void, Void> next = todos.remove();
+        next.execute();
+    }
+
     class EstablishConnection extends AsyncTask<Void, Void, Void> {
         private SharedPreferences prefs;
 
@@ -283,9 +323,11 @@ public class MqttConnectionService extends Service {
         }
 
         @Override
+        @MainThread
         protected void onPostExecute(Void aVoid) {
             Toast toast = Toast.makeText(MqttConnectionService.this, "MQTT Broker connection established", Toast.LENGTH_SHORT);
             toast.show();
+            processNextTask();
         }
     }
 }
