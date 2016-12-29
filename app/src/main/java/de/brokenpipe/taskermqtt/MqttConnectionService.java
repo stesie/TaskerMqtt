@@ -123,21 +123,11 @@ public class MqttConnectionService extends Service {
     }
 
     private void subscribe(String topic) {
-        runTask(new SubscribeTopic(topic));
+        runTask(new SubscribeTopic(topic), true);
     }
 
     private void unsubscribe(String topic) {
-        if (mqttClient == null || !mqttClient.isConnected()) {
-            Log.d(TAG, "currently not connected, ignoring unsubscribe");
-            return;
-        }
-
-        try {
-            Log.d(TAG, "unsubscribing from " + topic);
-            mqttClient.unsubscribe(topic);
-        } catch (MqttException e) {
-            Log.e(TAG, "failed to unsubscribe: " + e.toString());
-        }
+        runTask(new UnsubscribeTopic(topic), false);
     }
 
     private boolean createMqttClient() {
@@ -255,15 +245,45 @@ public class MqttConnectionService extends Service {
         }
     }
 
-    private void runTask(AsyncTask<Void, Void, Void> task) {
+    class UnsubscribeTopic extends AsyncTask<Void, Void, Void> {
+        private String topic;
+
+        UnsubscribeTopic (String topic) {
+            this.topic = topic;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                mqttClient.unsubscribe(topic);
+            } catch (MqttException e) {
+                Log.e(TAG, "Failed to unsubscribe from topic: " + topic);
+            }
+            return null;
+        }
+
+        @Override
+        @MainThread
+        protected void onPostExecute(Void aVoid) {
+            processNextTask();
+        }
+    }
+
+    private void runTask(AsyncTask<Void, Void, Void> task, boolean connectImplicitly) {
         if (todos.isEmpty()) {
             if (mqttClient != null && mqttClient.isConnected()) {
                 task.execute();
                 return;
             }
 
-            Log.d(TAG, "currently not connected, connecting implicitly");
-            connect();
+            if (connectImplicitly) {
+                Log.d(TAG, "currently not connected, connecting implicitly");
+                connect();
+            }
+            else {
+                Log.d(TAG, "not connected, rejecting task");
+                return;
+            }
         }
 
         todos.add(task);
